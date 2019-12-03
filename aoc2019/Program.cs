@@ -28,7 +28,7 @@ namespace Advent.Of.Code
             {
                 case 1: return new Day1.CounterUpper();
                 case 2: return new Day2.GravAssist();
-                case 3: throw new NotImplementedException(); // TODO
+                case 3: return new Day3.Manhattan();
                 default: throw new NotImplementedException($"Day {day} is not implemented");
             }
         }
