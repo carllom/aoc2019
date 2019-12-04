@@ -13,6 +13,7 @@ namespace Advent.Of.Code
                 throw new ApplicationException($"Expected {correct}, got {result}");
         }
 
-        protected void Echo(string msg) => Console.WriteLine(msg);
+        private const string Indent = "  ";
+        protected void Echo(string msg) => Console.WriteLine(Indent + msg);
     }
 }

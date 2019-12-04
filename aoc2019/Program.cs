@@ -1,36 +1,47 @@
 ﻿using System;
+using System.Linq;
 
 namespace Advent.Of.Code
 {
-    /// <summary>
-    /// ***REMOVED***
-    /// </summary>
     class Program
     {
         static void Main(string[] args)
         {
-            if (!int.TryParse(args[0], out var day))
+            if (args.Length > 0 && int.TryParse(args[0], out var day))
             {
-                Console.WriteLine("Requires day (number)");
+                // Run specific day
+                ExecuteTask(day);
                 return;
             }
 
+            // Run all days
+            day = 1;
+            while (ExecuteTask(day++)) { }
+        }
+
+        private static bool ExecuteTask(int day)
+        {
             var task = GetTask(day);
+            if (task == null) return false;
             Console.WriteLine($"Running day {day}, Task 1..");
             task.First();
             Console.WriteLine($"Running day {day}, Task 2..");
             task.Second();
+            Console.WriteLine();
+            return true;
         }
 
         private static AbstractAocTask GetTask(int day)
         {
-            switch(day)
+            return day switch
             {
-                case 1: return new Day1.CounterUpper();
-                case 2: return new Day2.GravAssist();
-                case 3: return new Day3.Manhattan();
-                default: throw new NotImplementedException($"Day {day} is not implemented");
-            }
+                1 => new Day1.CounterUpper(), // Day 1: "The Tyranny of the Rocket Equation"
+                2 => new Day2.GravAssist(),   // Day 2: "1202 Program Alarm"
+                3 => new Day3.Manhattan(),    // Day 3: "Crossed Wires"
+                4 => new Day4.SecureContainer(),    // Day 4: Secure Container
+                //X => new DayX.Tbd(),        // Day X: "TBD"
+                _ => null
+            };
         }
     }
 }
