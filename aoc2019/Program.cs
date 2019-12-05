@@ -38,7 +38,8 @@ namespace Advent.Of.Code
                 1 => new Day1.CounterUpper(), // Day 1: "The Tyranny of the Rocket Equation"
                 2 => new Day2.GravAssist(),   // Day 2: "1202 Program Alarm"
                 3 => new Day3.Manhattan(),    // Day 3: "Crossed Wires"
-                4 => new Day4.SecureContainer(),    // Day 4: Secure Container
+                4 => new Day4.SecureContainer(), // Day 4: "Secure Container"
+                5 => new Day5.Diagnostics(),  // Day 5: "Sunny with a Chance of Asteroids"
                 //X => new DayX.Tbd(),        // Day X: "TBD"
                 _ => null
             };
