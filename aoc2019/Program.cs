@@ -40,6 +40,7 @@ namespace Advent.Of.Code
                 3 => new Day3.Manhattan(),    // Day 3: "Crossed Wires"
                 4 => new Day4.SecureContainer(), // Day 4: "Secure Container"
                 5 => new Day5.Diagnostics(),  // Day 5: "Sunny with a Chance of Asteroids"
+                6 => new Day6.OrbitMap(),     // Day 6: "Universal Orbit Map"
                 //X => new DayX.Tbd(),        // Day X: "TBD"
                 _ => null
             };
