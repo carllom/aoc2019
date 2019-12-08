@@ -42,6 +42,7 @@ namespace Advent.Of.Code
                 5 => new Day5.Diagnostics(),  // Day 5: "Sunny with a Chance of Asteroids"
                 6 => new Day6.OrbitMap(),     // Day 6: "Universal Orbit Map"
                 7 => new Day7.Amplification(),// Day 7: "Amplification Circuit"
+                8 => new Day8.SpaceImage(),   // Day 8: "Space Image Format"
                 //X => new DayX.Tbd(),        // Day X: "TBD"
                 _ => null
             };
