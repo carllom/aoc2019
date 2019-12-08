@@ -41,6 +41,7 @@ namespace Advent.Of.Code
                 4 => new Day4.SecureContainer(), // Day 4: "Secure Container"
                 5 => new Day5.Diagnostics(),  // Day 5: "Sunny with a Chance of Asteroids"
                 6 => new Day6.OrbitMap(),     // Day 6: "Universal Orbit Map"
+                7 => new Day7.Amplification(),// Day 7: "Amplification Circuit"
                 //X => new DayX.Tbd(),        // Day X: "TBD"
                 _ => null
             };

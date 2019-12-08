@@ -8,63 +8,87 @@ namespace Advent.Of.Code.IntCode
     {
         public int pc;
         public int[] mem;
+        public IICWriter Input => input;
+        public IICReader Output => output;
+
+        private readonly IntCodeIOStream input;
+        private readonly IntCodeIOStream output;
+
+        public IntCodeMachine() : this(new IntCodeIOStream(), new IntCodeIOStream()) { }
+
+        public IntCodeMachine(IntCodeIOStream input, IntCodeIOStream output)
+        {
+            this.input = input;
+            this.output = output;
+        }
 
         public void Init(string path)
         {
             pc = 0;
             mem = File.ReadAllText(path).Split(',').Select(a => int.Parse(a)).ToArray();
+            input.Clear();
+            output.Clear();
         }
 
         public void Run()
         {
             while (true)
             {
-                var opcode = Instr;
-                switch (opcode % 100)
-                {
-                    case 1: // ADD A + B => C
-                        mem[Op3] = Op1Val + Op2Val;
-                        pc += 4;
-                        break;
-                    case 2: // MUL A * B => C
-                        mem[Op3] = Op1Val * Op2Val;
-                        pc += 4;
-                        break;
-                    case 3: // INP => A
-                        Console.Write("? ");
-                        mem[Op1] = int.Parse(Console.ReadLine());
-                        pc += 2;
-                        break;
-                    case 4: // OUT <= A
-                        Console.WriteLine($"! {Op1Val}");
-                        pc += 2;
-                        break;
-                    case 5: // JT => A!=0 ? pc=B
-                        if (Op1Val != 0)
-                            pc = Op2Val;
-                        else
-                            pc += 3;
-                        break;
-                    case 6: // JF => A==0 ? pc=B
-                        if (Op1Val == 0)
-                            pc = Op2Val;
-                        else
-                            pc += 3;
-                        break;
-                    case 7: // LT A<B => C
-                        mem[Op3] = (Op1Val < Op2Val) ? 1 : 0;
-                        pc += 4;
-                        break;
-                    case 8: // EQ A==B => C
-                        mem[Op3] = (Op1Val == Op2Val) ? 1 : 0;
-                        pc += 4;
-                        break;
-                    case 99:
-                        return;
-                    default:
-                        throw new ApplicationException($"Illegal opcode {mem[pc - 1]} @{pc - 1}");
-                }
+                if (!Step()) return;
             }
+        }
+
+        public bool Step()
+        {
+            var opcode = Instr;
+            switch (opcode % 100)
+            {
+                case 1: // ADD A + B => C
+                    mem[Op3] = Op1Val + Op2Val;
+                    pc += 4;
+                    break;
+                case 2: // MUL A * B => C
+                    mem[Op3] = Op1Val * Op2Val;
+                    pc += 4;
+                    break;
+                case 3: // INP => A
+                    if (!input.CanRead) return true; // Do not step if we are missing input
+                    var s = input.Read();
+                    Console.WriteLine($"? {s}");
+                    mem[Op1] = s;
+                    pc += 2;
+                    break;
+                case 4: // OUT <= A
+                    Console.WriteLine($"! {Op1Val}");
+                    output.Write(Op1Val);
+                    pc += 2;
+                    break;
+                case 5: // JT => A!=0 ? pc=B
+                    if (Op1Val != 0)
+                        pc = Op2Val;
+                    else
+                        pc += 3;
+                    break;
+                case 6: // JF => A==0 ? pc=B
+                    if (Op1Val == 0)
+                        pc = Op2Val;
+                    else
+                        pc += 3;
+                    break;
+                case 7: // LT A<B => C
+                    mem[Op3] = (Op1Val < Op2Val) ? 1 : 0;
+                    pc += 4;
+                    break;
+                case 8: // EQ A==B => C
+                    mem[Op3] = (Op1Val == Op2Val) ? 1 : 0;
+                    pc += 4;
+                    break;
+                case 99:
+                    return false;
+                default:
+                    throw new ApplicationException($"Illegal opcode {mem[pc - 1]} @{pc - 1}");
+            }
+            return true;
         }
 
         private enum AddrMode
