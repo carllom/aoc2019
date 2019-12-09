@@ -35,15 +35,16 @@ namespace Advent.Of.Code
         {
             return day switch
             {
-                1 => new Day1.CounterUpper(), // Day 1: "The Tyranny of the Rocket Equation"
-                2 => new Day2.GravAssist(),   // Day 2: "1202 Program Alarm"
-                3 => new Day3.Manhattan(),    // Day 3: "Crossed Wires"
-                4 => new Day4.SecureContainer(), // Day 4: "Secure Container"
-                5 => new Day5.Diagnostics(),  // Day 5: "Sunny with a Chance of Asteroids"
-                6 => new Day6.OrbitMap(),     // Day 6: "Universal Orbit Map"
-                7 => new Day7.Amplification(),// Day 7: "Amplification Circuit"
-                8 => new Day8.SpaceImage(),   // Day 8: "Space Image Format"
-                //X => new DayX.Tbd(),        // Day X: "TBD"
+                1 => new Day1.CounterUpper(),   // Day 1: "The Tyranny of the Rocket Equation"
+                2 => new Day2.GravAssist(),     // Day 2: "1202 Program Alarm"
+                3 => new Day3.Manhattan(),      // Day 3: "Crossed Wires"
+                4 => new Day4.SecureContainer(),// Day 4: "Secure Container"
+                5 => new Day5.Diagnostics(),    // Day 5: "Sunny with a Chance of Asteroids"
+                6 => new Day6.OrbitMap(),       // Day 6: "Universal Orbit Map"
+                7 => new Day7.Amplification(),  // Day 7: "Amplification Circuit"
+                8 => new Day8.SpaceImage(),     // Day 8: "Space Image Format"
+                9 => new Day9.SensorBoost(),    // Day 9: "Sensor Boost"
+                //X => new DayX.Tbd(),          // Day X: "TBD"
                 _ => null
             };
         }

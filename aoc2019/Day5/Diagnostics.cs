@@ -13,6 +13,7 @@ namespace Advent.Of.Code.Day5
         {
             Echo("Provide code 1");
             icm.Init("Day5/diagnostics.ic");
+            icm.Input.Write(1);
             icm.Run();
         }
 
@@ -20,6 +21,7 @@ namespace Advent.Of.Code.Day5
         {
             Echo("Provide code 5");
             icm.Init("Day5/diagnostics.ic");
+            icm.Input.Write(5);
             icm.Run();
         }
     }

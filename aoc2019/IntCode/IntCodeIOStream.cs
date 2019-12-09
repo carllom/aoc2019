@@ -5,28 +5,28 @@ namespace Advent.Of.Code.IntCode
     interface IICReader
     {
         bool CanRead { get; }
-        int Read();
+        long Read();
     }
 
     interface IICWriter
     {
-        void Write(int value);
+        void Write(long value);
     }
 
     class IntCodeIOStream : IICReader, IICWriter
     {
-        private Queue<int> buffer = new Queue<int>();
+        private Queue<long> buffer = new Queue<long>();
 
         public void Clear() { buffer.Clear(); }
 
-        public void Write(int value)
+        public void Write(long value)
         {
             buffer.Enqueue(value);
         }
 
         public bool CanRead { get { return buffer.Count > 0; } }
 
-        public int Read()
+        public long Read()
         {
             return buffer.Dequeue();
         }

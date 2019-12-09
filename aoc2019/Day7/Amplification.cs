@@ -10,7 +10,7 @@ namespace Day7
     {
         public override void First()
         {
-            var maxAmp = int.MinValue;
+            var maxAmp = long.MinValue;
             var maxPhase = "";
             var icms = new[]
             {
@@ -23,7 +23,7 @@ namespace Day7
 
             foreach (var perm in GetPermutations(new[] { 0, 1, 2, 3, 4 }, 5))
             {
-                var next = 0; // Start input is 0
+                var next = 0L; // Start input is 0
 
                 for (int amp = 0; amp < 5; amp++)
                 {
@@ -69,7 +69,7 @@ namespace Day7
 
         public override void Second()
         {
-            var maxAmp = int.MinValue;
+            var maxAmp = long.MinValue;
             var maxPhase = "";
             var icios = new[]
             {
