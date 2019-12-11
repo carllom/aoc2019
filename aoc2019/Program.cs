@@ -45,6 +45,7 @@ namespace Advent.Of.Code
                 8 => new Day8.SpaceImage(),     // Day 8: "Space Image Format"
                 9 => new Day9.SensorBoost(),    // Day 9: "Sensor Boost"
                 10 => new Day10.Asteroids(),    // Day 10: "Monitoring Station"
+                11 => new Day11.PainterRobot(),   // Day 11: "Space Police"
                 //X => new DayX.Tbd(),          // Day X: "TBD"
                 _ => null
             };
