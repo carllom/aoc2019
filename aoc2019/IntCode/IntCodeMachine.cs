@@ -10,6 +10,8 @@ namespace Advent.Of.Code.IntCode
         public long pc; // Program counter
         public long bp; // Base pointer
         public IntCodeVirtMem mem = new IntCodeVirtMem();
+
+        public bool WantInput { get; private set; }
         public IICWriter Input => input;
         public IICReader Output => output;
 
@@ -62,7 +64,12 @@ namespace Advent.Of.Code.IntCode
                     break;
                 case 3: // INP => A
                     DAsm($"@{Oper(1)} <= input ({Instr} {Oper(1)})");
-                    if (!input.CanRead) return true; // Do not step if we are missing input
+                    if (!input.CanRead)
+                    {
+                        WantInput = true;
+                        return true; // Do not step if we are missing input
+                    }
+                    WantInput = false;
                     var s = input.Read();
                     //Console.WriteLine($"? {s}");
                     Op1 = s;
