@@ -26,6 +26,7 @@ namespace Day13
 
         private void Play(IntCodeMachine icm)
         {
+            var y0 = Console.CursorTop;
             int phase = 0;
             (long x, long y) cur = (x: 0, y: 0);
             while (icm.Step())
@@ -52,6 +53,8 @@ namespace Day13
                 }
                 if (icm.WantInput)
                 {
+                    Console.CursorLeft = 0;
+                    Console.CursorTop = y0;
                     RenderScreen(icm);
                 }
             }
@@ -61,8 +64,6 @@ namespace Day13
         private long RenderScreen(IntCodeMachine icm)
         {
             var score = 0L;
-            Console.CursorLeft = 0;
-            Console.CursorTop = 0;
             Console.WriteLine($"tiles: {tiles.Count(t => t.Value == 2)}     ");
             foreach (var row in tiles.GroupBy(t => t.Key.y, t => t).OrderBy(t => t.Key))
             {
@@ -116,7 +117,10 @@ namespace Day13
             icm.Init("Day13/breakout.ic");
 
             icm.mem[0] = 2; // 2 quarters
+            var y0 = Console.CursorTop;
             Play(icm);
+            Console.CursorLeft = 0;
+            Console.CursorTop = y0;
             var score = RenderScreen(icm);
             Echo($"Final score: {score}");
             ValidateAnswer(score, 15328);

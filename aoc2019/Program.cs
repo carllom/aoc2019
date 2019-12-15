@@ -49,6 +49,7 @@ namespace Advent.Of.Code
                 12 => new Day12.Gravity(),      // Day 12: "The N-Body Problem"
                 13 => new Day13.Arcade(),       // Day 13: "Care Package"
                 14 => new Day14.Crafting(),     // Day 14: "Space Stoichiometry"
+                15 => new Day15.Oxygen(),       // Day 15: "Oxygen System"
                 //X => new DayX.Tbd(),          // Day X: "TBD"
                 _ => null
             };
