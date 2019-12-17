@@ -19,7 +19,8 @@ namespace Day16
             var data2 = new int[data.Length];
             for (int phase = 1; phase <= 100; phase++)
             {
-                CalcPhase2(data, data2);
+                //CalcPhase2(data, data2);
+                CalcMultiFan(data, data2);
                 Swap(ref data, ref data2);
             }
             var first8 = Take8(data);
@@ -113,39 +114,83 @@ namespace Day16
         }
 
         /// <summary>
-        /// Calculate a positive fan 
+        /// Calculate a "fan" 
         /// </summary>
         /// <param name="dataIn">input array</param>
         /// <param name="dataOut">output array</param>
         /// <param name="startIdxIn">input start index ("x position")</param>
         /// <param name="startIdxOut">output start index ("y position"). Also infers width of fan</param>
         /// <param name="leftSlant">steps to the right to add when you go up to the next index</param>
-        /// <param name="rightSlant">steps to the left to remove when you go down to the previous index</param>
-        private void CalcPositiveFan(int[] dataIn, int[] dataOut, int startIdxIn, int startIdxOut, int leftSlant, int rightSlant)
+        /// <param name="stopAtIdx">halt fan calculation at index</param>
+        private void CalcFan(int[] dataIn, int[] dataOut, int startIdxIn, int startIdxOut, int leftSlant, int stopAt, int sign)
         {
+            //if (!(stopAt > leftSlant)) throw new ArgumentException("stop index must be greater than slant");
+
             var idxOut = startIdxOut;
-            var lEdge = startIdxIn;
+            var lEdge = startIdxIn; // compensate for slant reduction on first iteration
             var lastData = 0;
-            while (idxOut > leftSlant)
+
+            var slantLimit = leftSlant;
+            //var slantLimit = leftSlant * 2 + 1; // left + right slant (number of difference elements applied per line)
+            // Do overlapping portion of fan (base calculations on previous result and apply differences)
+            while (idxOut >= slantLimit)
             {
                 dataOut[idxOut] = lastData; // Copy the old value
 
                 // Add leftSlant entries to the new
-                for (int i = 1; i <= leftSlant; i++)
+                //for (int i = 1; i <= leftSlant; i++)
+                for (int i = 0; i < leftSlant; i++)
                 {
-                    dataOut[idxOut] += dataIn[lEdge - i];
+                    var lPos = lEdge + i;
+                    if (lPos >= dataOut.Length) break; // Outside range
+                    dataOut[idxOut] += dataIn[lPos] * sign;
                 }
                 // Remove rightSlant (leftSlant+1) entries from the new value
-                for (int i = 1; i <= leftSlant + 1; i++)
+                var rEdge = lEdge + idxOut + 1; // Width of fan is idxOut+1
+                if (rEdge < dataOut.Length) // Only loop if right edge is inside range
                 {
-                    var rPos = lEdge + startIdxOut - i;
-                    if (rPos < dataOut.Length)
-                        dataOut[idxOut] -= dataIn[rPos]; 
+                    for (int i = 0; i < leftSlant + 1; i++)
+                    {
+                        var rPos = rEdge + i; 
+                        if (rPos >= dataOut.Length) break; // Outside range
+                        dataOut[idxOut] -= dataIn[rPos] * sign;
+                    }
                 }
-                dataOut[idxOut] = dataOut[idxOut] % 10;
+                dataOut[idxOut] = Math.Abs(dataOut[idxOut]) % 10;
                 lastData = dataOut[idxOut];
                 idxOut--;
                 lEdge -= leftSlant;
+            }
+            // Do disjunct portion (just calculate a single strip
+            while (idxOut >= stopAt)
+            {
+                // Add leftSlant entries to the new
+                for (int i = 0; i <= idxOut; i++)
+                {
+                    var pos = lEdge + i;
+                    if (pos >= dataOut.Length) break; // Outside range
+                    dataOut[idxOut] += dataIn[pos] * sign;
+                }
+                dataOut[idxOut] = Math.Abs(dataOut[idxOut]) % 10;
+                idxOut--;
+                lEdge -= leftSlant;
+            }
+        }
+
+        //CalcFan(data, data2, data.Length, data.Length - 1, 1, 2, -1);
+        private void CalcMultiFan(int[] dataIn, int[] dataOut)
+        {
+            int fanNumber = 0;
+            var totalFans = dataIn.Length / 2;
+            while (fanNumber < totalFans)
+            {
+                var startOutIdx = (int)Math.Floor(((double)dataOut.Length / (2 * fanNumber + 1)) - 1); // First index where the fan is visible
+                var startInIdx = startOutIdx + fanNumber * 2 * (startOutIdx + 1); // fan left edge position (first space + fannbr*2*fanwidth
+                var leftSlant = 2 * fanNumber + 1; // Slant on left side of fan
+                var mult = fanNumber % 2 == 1 ? -1 : 1;
+                CalcFan(dataIn, dataOut, startInIdx, startOutIdx, leftSlant, 0, mult);
+                fanNumber++;
+                if (fanNumber % 1000 == 0) Console.Write('*');
             }
         }
 
@@ -188,8 +233,9 @@ namespace Day16
             {
                 sw.Reset();
                 sw.Start();
-                CalcPositiveFan(data, data2, data.Length, data.Length - 1, 1, 2);
-                CalcPhase2(data, data2);
+                CalcMultiFan(data, data2);
+                //CalcFan(data, data2, data.Length, data.Length - 1, 1, 2, -1);
+                //CalcPhase2(data, data2);
                 sw.Stop();
                 Echo($"Phase took {sw.Elapsed}");
                 Swap(ref data, ref data2);
