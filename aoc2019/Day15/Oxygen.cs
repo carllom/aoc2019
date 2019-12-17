@@ -3,7 +3,7 @@ using Advent.Of.Code.IntCode;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using Utils;
 
 namespace Day15
 {
@@ -39,7 +39,7 @@ namespace Day15
         private SparseMap<char> CreateMap(IntCodeMachine icm)
         {
             var y0 = Console.CursorTop;
-            var map = new SparseMap<char>();
+            var map = new SparseMap<char>(true);
             bool wall = false, oxyfound = false;
             (int x, int y) cur = (0, 0), oxygen = (0, 0);
             map.Set(cur, '.'); // Start @ free position
@@ -147,48 +147,6 @@ namespace Day15
 
             Echo($"Oxygen levels restored in {minutes} minutes");
             ValidateAnswer(minutes, 544);
-        }
-    }
-
-    class SparseMap<T>
-    {
-        public Dictionary<(int x, int y), T> map = new Dictionary<(int x, int y), T>();
-        public T Get((int x, int y) coord) {
-            return map.ContainsKey(coord) ? map[coord] : default(T);
-        }
-
-        public void Set((int x, int y) coord, T value)
-        {
-            map[coord] = value;
-        } 
-
-        public void Render((int x, int y)? cur = null)
-        {
-            if (!map.Any()) return; // Empty map
-
-            // Get paint boundaries
-            int xmin = map.Min(p => p.Key.x), xmax = map.Max(p => p.Key.x);
-            int ymin = map.Min(p => p.Key.y), ymax = map.Max(p => p.Key.y);
-            for (int y = ymax; y >= ymin; y--) // positive y is up
-            {
-                var sb = new StringBuilder(xmax - xmin);
-                for (var x = xmin; x <= xmax; x++)
-                {
-                    if (cur.HasValue && x == cur.Value.x && y == cur.Value.y)
-                    {
-                        sb.Append('D');
-                    }
-                    else if (map.ContainsKey((x,y)))
-                    {
-                        sb.Append(map[(x, y)]);
-                    }
-                    else
-                    {
-                        sb.Append(' ');
-                    }
-                }
-                Console.WriteLine(sb.ToString());
-            }
         }
     }
 }
