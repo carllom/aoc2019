@@ -1,0 +1,116 @@
+# Problem notes
+
+10000 reps of 650 = 6500000
+
+* It's really a matter of which number to add and which to subtract
+* 50% of numbers (3 250 000) are involved in calculation of each digit. In total 6500000 * 3250000 per phase.. too many to be done naively. It takes ~1s to do 650 numbers => at least 30h to do the entire calculation.
+* Where is the repetition? think of it like expanding fields:
+
+```text
+   00000000001111111111222222222233333333334444444444555555555
+   01234567890123456789012345678901234567890123456789012345678
+0  + - + - + - + - + - + - + - + - + - + - + - + - + - + - + -
+1   ++  --  ++  --  ++  --  ++  --  ++  --  ++  --  ++  --  ++
+2    +++   ---   +++   ---   +++   ---   +++   ---   +++   ---
+3     ++++    ----    ++++    ----    ++++    ----    ++++    
+4      +++++     -----     +++++     -----     +++++     -----
+5       ++++++      ------      ++++++      ------      ++++++
+6        +++++++       -------       +++++++       -------
+7         ++++++++        --------        ++++++++        ----
+8          +++++++++         ---------         +++++++++      
+9           ++++++++++          ----------          ++++++++++
+```
+
+* Try to find repetitions in multiples of source length
+* Only calculate dependencies of digit n
+
+To calculate digit 0 you need to calculate every other digit. Thats 3250000 - still a lot
+
+length*n / convlen = whole number
+
+650*2 /  4 = 325. Digit 0 repeats after  2 source repetitions. Multiply that by 10000/2 = 5000
+650*4 /  8 = 325. Digit 1 repeats after  4 source repetitions. Multiply that by 10000/4 = 2500
+650*6 / 12 = 325. Digit 2 repeats after  6 source repetitions. Multiply that by 10000/6 = 1666.66 ~
+650*8 / 16 = 325. Digit 3 repeats after  8 source repetitions. Multiply that by 10000/8 = 1250 
+650*10/ 20 = 325. Digit 4 repeats after  2 source repetitions. Multiply that by 10000/2 = 5000
+650*12/ 24 = 325. Digit 5 repeats after 12 source repetitions. Multiply that by 10000/12 = 833.33 ~
+650*14/ 28 = 325. Digit 6 repeats after 14 source repetitions. Multiply that by 10000/14 = 714.285 ~
+650*16/ 32 = 325. Digit 7 repeats after 16 source repetitions. Multiply that by 10000/16 = 625
+trivial case seems to be 2*i repetitions
+650*(650*2) = 845000
+
+* Can we iterate over a single number given the repetition length as input? For position 0 it is 1300 numbers (325 repetitions of 4 )
+
+The thing is, we don't know the repetition length in iteration 2+. Iteration 1 is OK, since we have a known input.
+
+The only way we can reduce the number of operations is if we can copy half-calculated values. 
+There does not seem to be a good way to work "vertically", since we always have a slant and 
+
+```text
+   00000000001111111111222222222233333333334444444444555555555
+   01234567890123456789012345678901234567890123456789012345678
+0  + - + - + - + - + - + - + - + - + - + - + - + - + - + - + -
+1   ++  --  ++  --  ++  --  ++  --  ++  --  ++  --  ++  --  ++
+2    +++   ---   +++   ---   +++   ---   +++   ---   +++   ---
+3     ++++    ----    ++++    ----    ++++    ----    ++++    
+4      ++++y     -----     +++++     -----     +++++     -----
+5       +++xyy      ------      ++++++      ------      ++++++
+6        ++xxxyy       -------       +++++++       -------
+7         +xxxxxyy        --------        ++++++++        ----
+8          xxxxxxxyy         ---------         +++++++++      
+9           ++++++++++          ----------          ++++++++++
+```
+
+..or perhaps we could subtract and add to reduce the operations
+
+```text
+   00000000001111111111222222222233333333334444444444555555555
+   01234567890123456789012345678901234567890123456789012345678
+0  ! - + - + - + - + - + - + - + - + - + - + - + - + - + - + -
+1  _!!  --  ++  --  ++  --  ++  --  ++  --  ++  --  ++  --  ++
+2   _+!!   ---   +++   ---   +++   ---   +++   ---   +++   ---
+3    _++!!    ----    ++++    ----    ++++    ----    ++++    
+4     _+++!!  !!!-____     +++++     -----     +++++     -----
+5      _++++!!   !!!--____      ++++++      ------      ++++++
+6       _+++++!!    !!!---____       +++++++       -------
+7        _++++++!!     !!!----____        ++++++++        ----
+8         _+++++++!!      !!!-----____         +++++++++      
+9          _++++++++!!       !!!------____          ++++++++++
+```
+
+See above, when the overlap is larger than the differencing operations, we could benefit from copied values. Question is, how much?
+First section has 3 differencing operations (remove 1, add 2). Second section has 7 differencing operations (remove 3, add 4), third has 11 (remove 5, add 6), and so on.
+It does not feel like a stable method though, especially when you move further to the right.
+
+Or is it? what happens when you move backwards through this?
+
+```text
+   000000000011111  11111222222222233333333334444444444555555555
+   012345678901234  56789012345678901234567890123456789012345678
+0  + - + - + - + -   + - + - + - + - + - + - + - + - + - + - + -
+1   ++  --  ++  --    ++  --  ++  --  ++  --  ++  --  ++  --  ++
+2    +++   ---   +  ++   ---   +++   ---   +++   ---   +++   ---
+
+3     ++++    ----      ++++    ----    ++++    ----    ++++    
+4      +++++     -  ----     +++++     -----     +++++     -----
+
+5       ++++++        ------      ++++++      ------      ++++++
+6        +++++++         -------       +++++++       -------
+7         ++++++++          --------        ++++++++        ----
+8          +++++++  ++         ---------         +++++++++      
+9           ++++++  ++++          ----------          ++++++++++
+10           +++++  ++++++           -----------           +++++
+11            ++++  ++++++++            ------------            
+12             +++  ++++++++++             -------------        
+13              ++  ++++++++++++              --------------    
+14               +  ++++++++++++++               ---------------
+```
+
+* The nth number just has the nth input (first=n, last = 2*n)
+* The n-1th number adds the n-1th number to the previous and so on..
+* ..until 6 when last is 2 below n (12)
+* So, if we do a special operation for 14 downto 7, (or even 5 if we subtract as well)
+* ..and then also does the same for the next negative section starting at 4 and ending at 3
+* ..and perhaps again for the next positive range we could effectively calculate a major part of the stream
+* If we just do the positive bit, we can calculate 2/3 of the array.
+* The rest can be calculated the ordinary way
