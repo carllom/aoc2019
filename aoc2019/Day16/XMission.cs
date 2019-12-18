@@ -1,8 +1,6 @@
 ﻿using Advent.Of.Code;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Timers;
 
 namespace Day16
 {
@@ -14,21 +12,44 @@ namespace Day16
 
         public override void First()
         {
-            var data = input.Select(c => c - '0').ToArray();
-            //var data = new[] { 1, 2, 3, 4, 5, 6, 7, 8 };
-            var data2 = new int[data.Length];
+            //var data = new long[] {1,2,3,4,5,6,7,8};
+            var data = input.Select(c => (long)(c - '0')).ToArray();
+            var data2 = new long[data.Length];
             for (int phase = 1; phase <= 100; phase++)
             {
                 //CalcPhase2(data, data2);
                 CalcMultiFan(data, data2);
                 Swap(ref data, ref data2);
+                Array.Clear(data2, 0, data2.Length);
             }
-            var first8 = Take8(data);
+            var first8 = TakeN(data, 8);
             Echo($"First 8 digits of input after 100 phases: {first8}");
             ValidateAnswer(first8, "63794407");
         }
 
-        private void Swap(ref int[] a, ref int[] b)
+        private void CompareAlgos()
+        {
+            for (int n = 8; n < input.Length; n++)
+            {
+                var data = input.Select(c => (long)(c - '0')).Take(n).ToArray();
+                var data3a = data.Select(x => x).ToArray();
+                var data2 = new long[data.Length];
+                for (int phase = 1; phase <= 100; phase++)
+                {
+                    CalcPhase2(data, data2);
+                    var data3 = new long[data.Length];
+                    CalcMultiFan(data3a, data3);
+                    for (int i = 0; i < data2.Length; i++)
+                    {
+                        if (data2[i] != data3[i]) throw new ApplicationException("!!!!");
+                    }
+                    Swap(ref data3a, ref data3);
+                    Swap(ref data, ref data2);
+                }
+            }
+        }
+
+        private void Swap(ref long[] a, ref long[] b)
         {
             var tmp = a; a = b; b = tmp;
         }
@@ -56,11 +77,11 @@ namespace Day16
         /// </summary>
         /// <param name="dataIn"></param>
         /// <param name="dataOut"></param>
-        private void CalcPhase2(int[] dataIn, int[] dataOut)
+        private void CalcPhase2(long[] dataIn, long[] dataOut)
         {
             for (int mult = 1; mult <= dataIn.Length; mult++)
             {
-                int digit = 0;
+                long digit = 0;
                 int srcPos = -1;
                 var len = dataIn.Length;
                 while (srcPos < len)
@@ -80,7 +101,6 @@ namespace Day16
                     }
                     srcPos += mult; // advance p3
                 }
-                if (mult % 10000 == 0) Console.Write('.');
                 dataOut[mult - 1] = Math.Abs(digit) % 10;
             }
         }
@@ -122,28 +142,27 @@ namespace Day16
         /// <param name="startIdxOut">output start index ("y position"). Also infers width of fan</param>
         /// <param name="leftSlant">steps to the right to add when you go up to the next index</param>
         /// <param name="stopAtIdx">halt fan calculation at index</param>
-        private void CalcFan(int[] dataIn, int[] dataOut, int startIdxIn, int startIdxOut, int leftSlant, int stopAt, int sign)
+        private void CalcFan(long[] dataIn, long[] dataOut, int startIdxIn, int startIdxOut, int leftSlant, int stopAt, int sign)
         {
             //if (!(stopAt > leftSlant)) throw new ArgumentException("stop index must be greater than slant");
 
             var idxOut = startIdxOut;
             var lEdge = startIdxIn; // compensate for slant reduction on first iteration
-            var lastData = 0;
+            long lastData = 0, currentData = 0;
 
             var slantLimit = leftSlant;
             //var slantLimit = leftSlant * 2 + 1; // left + right slant (number of difference elements applied per line)
             // Do overlapping portion of fan (base calculations on previous result and apply differences)
             while (idxOut >= slantLimit)
             {
-                dataOut[idxOut] = lastData; // Copy the old value
+                currentData = lastData; // Copy the old value
 
                 // Add leftSlant entries to the new
-                //for (int i = 1; i <= leftSlant; i++)
                 for (int i = 0; i < leftSlant; i++)
                 {
                     var lPos = lEdge + i;
                     if (lPos >= dataOut.Length) break; // Outside range
-                    dataOut[idxOut] += dataIn[lPos] * sign;
+                    currentData += dataIn[lPos] * sign;
                 }
                 // Remove rightSlant (leftSlant+1) entries from the new value
                 var rEdge = lEdge + idxOut + 1; // Width of fan is idxOut+1
@@ -153,11 +172,11 @@ namespace Day16
                     {
                         var rPos = rEdge + i; 
                         if (rPos >= dataOut.Length) break; // Outside range
-                        dataOut[idxOut] -= dataIn[rPos] * sign;
+                        currentData -= dataIn[rPos] * sign;
                     }
                 }
-                dataOut[idxOut] = Math.Abs(dataOut[idxOut]) % 10;
-                lastData = dataOut[idxOut];
+                dataOut[idxOut] += currentData;
+                lastData = currentData;
                 idxOut--;
                 lEdge -= leftSlant;
             }
@@ -171,33 +190,37 @@ namespace Day16
                     if (pos >= dataOut.Length) break; // Outside range
                     dataOut[idxOut] += dataIn[pos] * sign;
                 }
-                dataOut[idxOut] = Math.Abs(dataOut[idxOut]) % 10;
+                //dataOut[idxOut] = Math.Abs(dataOut[idxOut]) % 10;
                 idxOut--;
                 lEdge -= leftSlant;
             }
         }
 
         //CalcFan(data, data2, data.Length, data.Length - 1, 1, 2, -1);
-        private void CalcMultiFan(int[] dataIn, int[] dataOut)
+        private void CalcMultiFan(long[] dataIn, long[] dataOut)
         {
             int fanNumber = 0;
-            var totalFans = dataIn.Length / 2;
+            var totalFans = (dataIn.Length + 1) / 2;
+            //var fanOut = new long[dataOut.Length];
             while (fanNumber < totalFans)
             {
+                //Array.Clear(fanOut, 0, fanOut.Length); // Clear the tmp array
                 var startOutIdx = (int)Math.Floor(((double)dataOut.Length / (2 * fanNumber + 1)) - 1); // First index where the fan is visible
                 var startInIdx = startOutIdx + fanNumber * 2 * (startOutIdx + 1); // fan left edge position (first space + fannbr*2*fanwidth
                 var leftSlant = 2 * fanNumber + 1; // Slant on left side of fan
                 var mult = fanNumber % 2 == 1 ? -1 : 1;
                 CalcFan(dataIn, dataOut, startInIdx, startOutIdx, leftSlant, 0, mult);
                 fanNumber++;
-                if (fanNumber % 1000 == 0) Console.Write('*');
+            }
+            for (int i = 0; i < dataOut.Length; i++)
+            {
+                dataOut[i] = Math.Abs(dataOut[i]) % 10;
             }
         }
 
-
-        private string Take8(int[] array, int offset=0)
+        private string TakeN(long[] array, int num, int offset=0)
         {
-            return array.Skip(offset).Take(8).Aggregate("", (acc, i) => acc + i);
+            return array.Skip(offset).Take(num).Aggregate("", (acc, i) => acc + i);
         }
 
         private int MaxMult(int arrLength)
@@ -220,10 +243,10 @@ namespace Day16
 
         public override void Second()
         {
-            var data0 = input.Select(c => c - '0').ToArray();
+            var data0 = input.Select(c => (long)(c - '0')).ToArray();
             var mult = 10000;//MaxMult(data0.Length); // Don't do 10000 - it repeats after MaxMult() (abount 2*data0.Length) repetitions anyway
-            var data = new int[data0.Length * mult]; 
-            var data2 = new int[data.Length];
+            var data = new long[data0.Length * mult]; 
+            var data2 = new long[data.Length];
             for (int i = 0; i < mult; i++)
             {
                 Array.Copy(data0, 0, data, i * data0.Length, data0.Length);
@@ -234,16 +257,15 @@ namespace Day16
                 sw.Reset();
                 sw.Start();
                 CalcMultiFan(data, data2);
-                //CalcFan(data, data2, data.Length, data.Length - 1, 1, 2, -1);
-                //CalcPhase2(data, data2);
                 sw.Stop();
                 Echo($"Phase took {sw.Elapsed}");
                 Swap(ref data, ref data2);
+                Array.Clear(data2, 0, data2.Length);
             }
-            var offset = int.Parse(Take8(data0));
-            var result = Take8(data, offset);
+            var offset = int.Parse(TakeN(data0, 7));
+            var result = TakeN(data, 8, offset);
             Echo($"Decoded message: {result}");
-            ValidateAnswer(result, "00000000");
+            ValidateAnswer(result, "77247538");
         }
     }
 }
