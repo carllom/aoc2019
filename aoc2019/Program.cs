@@ -52,6 +52,7 @@ namespace Advent.Of.Code
                 15 => new Day15.Oxygen(),       // Day 15: "Oxygen System"
                 16 => new Day16.XMission(),     // Day 16: "Flawed Frequency Transmission"
                 17 => new Day17.Scaffold(),     // Day 17: "Set and Forget"
+                18 => new Day18.Tunnels(),      // Day 18: "Many-Worlds Interpretation"
                 //X => new DayX.Tbd(),          // Day X: "TBD"
                 _ => null
             };
